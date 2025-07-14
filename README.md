@@ -1,69 +1,162 @@
-# React + TypeScript + Vite
+# Miniature System - Firebase Web App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern React TypeScript web application with Firebase integration for authentication, Firestore database, and push notifications.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🔐 **Firebase Authentication** - Email/password sign up and sign in
+- 📊 **Firestore Database** - Real-time messaging and data storage
+- 🔔 **Push Notifications** - Firebase Cloud Messaging integration
+- ⚡ **Vite** - Fast development and build tooling
+- 🎨 **Tailwind CSS** - Modern, utility-first CSS framework
+- 📱 **Responsive Design** - Works on desktop and mobile
 
-## Expanding the ESLint configuration
+## Prerequisites
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Node.js (v16 or higher)
+- npm or yarn
+- Firebase project
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Setup Instructions
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### 1. Clone the Repository
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+git clone https://github.com/mfpgllc/miniature-system.git
+cd miniature-system
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Install Dependencies
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
+
+### 3. Firebase Configuration
+
+1. **Create a Firebase Project:**
+   - Go to [Firebase Console](https://console.firebase.google.com/)
+   - Click "Add project"
+   - Follow the setup wizard
+
+2. **Enable Services:**
+   - **Authentication:** Go to Authentication → Sign-in method → Enable Email/Password
+   - **Firestore:** Go to Firestore Database → Create database → Start in test mode
+   - **Cloud Messaging:** Go to Project Settings → Cloud Messaging → Generate key pair
+
+3. **Get Configuration:**
+   - Go to Project Settings → General → Your apps
+   - Click the web icon (</>) to add a web app
+   - Copy the configuration object
+
+4. **Update Configuration:**
+   - Open `src/firebase/config.ts`
+   - Replace the placeholder values with your Firebase config:
+   ```typescript
+   const firebaseConfig = {
+     apiKey: "your-api-key",
+     authDomain: "your-project-id.firebaseapp.com",
+     projectId: "your-project-id",
+     storageBucket: "your-project-id.appspot.com",
+     messagingSenderId: "your-sender-id",
+     appId: "your-app-id"
+   };
+   ```
+
+5. **Update Service Worker:**
+   - Open `public/firebase-messaging-sw.js`
+   - Replace the Firebase config with your actual config
+
+6. **Get VAPID Key:**
+   - In Firebase Console, go to Project Settings → Cloud Messaging
+   - Generate a new key pair
+   - Copy the key and replace `YOUR_VAPID_KEY` in `src/firebase/config.ts`
+
+### 4. Start Development Server
+
+```bash
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`
+
+## Project Structure
+
+```
+src/
+├── components/
+│   ├── Login.tsx          # Authentication component
+│   └── Dashboard.tsx      # Main app dashboard
+├── contexts/
+│   └── AuthContext.tsx    # Authentication context
+├── firebase/
+│   └── config.ts          # Firebase configuration
+├── App.tsx                # Main app component
+└── main.tsx              # App entry point
+
+public/
+└── firebase-messaging-sw.js  # Service worker for notifications
+```
+
+## Usage
+
+1. **Sign Up/Sign In:** Use the login form to create an account or sign in
+2. **Send Messages:** Once authenticated, you can send messages that are stored in Firestore
+3. **Notifications:** Allow browser notifications to receive push messages
+4. **Real-time Updates:** Messages appear in real-time across all connected users
+
+## Deployment
+
+### Build for Production
+
+```bash
+npm run build
+```
+
+### Deploy to Firebase Hosting
+
+1. Install Firebase CLI:
+   ```bash
+   npm install -g firebase-tools
+   ```
+
+2. Login to Firebase:
+   ```bash
+   firebase login
+   ```
+
+3. Initialize Firebase Hosting:
+   ```bash
+   firebase init hosting
+   ```
+
+4. Deploy:
+   ```bash
+   firebase deploy
+   ```
+
+## Security Rules
+
+Make sure to set up proper Firestore security rules in your Firebase Console:
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /messages/{messageId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.
