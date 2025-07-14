@@ -4,14 +4,14 @@ import { getFirestore } from 'firebase/firestore';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 
 // Your Firebase configuration
-// Replace these values with your actual Firebase project config
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyA5lOZr-D9EwGekT9kDhYmZeUASSooJPjo",
+  authDomain: "rosterblockbuster.firebaseapp.com",
+  projectId: "rosterblockbuster",
+  storageBucket: "rosterblockbuster.firebasestorage.app",
+  messagingSenderId: "451804725199",
+  appId: "1:451804725199:web:cfb0ac9293772c213a5cba",
+  measurementId: "G-WFCC474JWX"
 };
 
 // Initialize Firebase
@@ -57,7 +57,7 @@ export const requestNotificationPermission = async () => {
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
       const token = await getToken(messaging, {
-        vapidKey: 'YOUR_VAPID_KEY'
+        vapidKey: 'BKLI84T0ixoMfv3tGo_reC6_Odqc-wH2pEpsGyGC0W-SDw8w0OIut6WWfmqseZ7lGM1xnyJ8Fyw9MsfYyg_B1O8'
       });
       return token;
     }

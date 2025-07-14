@@ -4,12 +4,12 @@ importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compa
 
 // Your Firebase configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyA5lOZr-D9EwGekT9kDhYmZeUASSooJPjo",
+  authDomain: "rosterblockbuster.firebaseapp.com",
+  projectId: "rosterblockbuster",
+  storageBucket: "rosterblockbuster.firebasestorage.app",
+  messagingSenderId: "451804725199",
+  appId: "1:451804725199:web:cfb0ac9293772c213a5cba"
 };
 
 // Initialize Firebase
