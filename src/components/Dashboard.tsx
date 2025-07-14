@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { signOut, addDocument, getDocuments, requestNotificationPermission, onMessageListener } from '../firebase/config';
+import PaymentPage from './PaymentPage';
 
 interface Message {
   id: string;
@@ -15,6 +16,7 @@ const Dashboard: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
   const [notificationToken, setNotificationToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
 
   useEffect(() => {
     loadMessages();
@@ -72,6 +74,10 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  if (showPayment) {
+    return <PaymentPage />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <nav className="bg-white shadow-sm">
@@ -81,6 +87,12 @@ const Dashboard: React.FC = () => {
               <h1 className="text-xl font-semibold text-gray-900">Miniature System</h1>
             </div>
             <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setShowPayment(true)}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+              >
+                💳 Make Payment
+              </button>
               <span className="text-sm text-gray-700">
                 Welcome, {currentUser?.email}
               </span>

@@ -7,6 +7,7 @@ A modern React TypeScript web application with Firebase integration for authenti
 - 🔐 **Firebase Authentication** - Email/password sign up and sign in
 - 📊 **Firestore Database** - Real-time messaging and data storage
 - 🔔 **Push Notifications** - Firebase Cloud Messaging integration
+- 💳 **Stripe Payments** - Secure payment processing with test environment
 - ⚡ **Vite** - Fast development and build tooling
 - 🎨 **Tailwind CSS** - Modern, utility-first CSS framework
 - 📱 **Responsive Design** - Works on desktop and mobile
@@ -67,12 +68,32 @@ npm install
    - Open `public/firebase-messaging-sw.js`
    - Replace the Firebase config with your actual config
 
-6. **Get VAPID Key:**
+  6. **Get VAPID Key:**
    - In Firebase Console, go to Project Settings → Cloud Messaging
    - Generate a new key pair
    - Copy the key and replace `YOUR_VAPID_KEY` in `src/firebase/config.ts`
 
-### 4. Start Development Server
+### 4. Stripe Configuration
+
+1. **Create a Stripe Account:**
+   - Go to [Stripe Dashboard](https://dashboard.stripe.com/)
+   - Sign up for a free account
+   - Navigate to the test environment
+
+2. **Get Your Publishable Key:**
+   - Go to Developers → API keys
+   - Copy your **Publishable key** (starts with `pk_test_`)
+
+3. **Update Stripe Configuration:**
+   - Open `src/stripe/config.ts`
+   - Replace `pk_test_YOUR_PUBLISHABLE_KEY` with your actual publishable key
+
+4. **Test Cards:**
+   - Use the test card numbers provided in the payment form
+   - `4242424242424242` for successful payments
+   - `4000000000000002` for declined payments
+
+### 5. Start Development Server
 
 ```bash
 npm run dev

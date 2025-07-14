@@ -10,6 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@stripe/react-stripe-js": "^3.7.0",
+    "@stripe/stripe-js": "^7.4.0",
+    "@tailwindcss/postcss": "^4.1.11",
     "firebase": "^11.10.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
