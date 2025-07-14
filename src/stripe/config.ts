@@ -2,7 +2,7 @@ import { loadStripe } from '@stripe/stripe-js';
 
 // Stripe publishable key (test environment)
 // Replace with your actual Stripe publishable key
-const stripePublishableKey = 'pk_test_YOUR_PUBLISHABLE_KEY';
+const stripePublishableKey = 'pk_test_51RkeCGRkpTifFDd8rWhdUQCvhYVvn66wWM75EzUYY42HCtd1UieZCqYCjC1MhM2Ue2DmLANdOr3WesFvKziAUAl300lIMTqUIb';
 
 export const stripePromise = loadStripe(stripePublishableKey);
 
