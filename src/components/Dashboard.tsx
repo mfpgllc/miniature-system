@@ -2,12 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { signOut, addDocument, getDocuments, requestNotificationPermission, onMessageListener } from '../firebase/config';
 import PaymentPage from './PaymentPage';
+import { apiService } from '../services/api';
 
 interface Message {
   id: string;
   text: string;
   userId: string;
   timestamp: any;
+}
+
+interface Payment {
+  id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  created: string;
+  updated: string;
 }
 
 const Dashboard: React.FC = () => {
@@ -17,10 +27,13 @@ const Dashboard: React.FC = () => {
   const [notificationToken, setNotificationToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [showPaymentHistory, setShowPaymentHistory] = useState(false);
 
   useEffect(() => {
     loadMessages();
     setupNotifications();
+    loadPaymentHistory();
   }, []);
 
   const loadMessages = async () => {
@@ -29,6 +42,15 @@ const Dashboard: React.FC = () => {
       setMessages(docs as Message[]);
     } catch (error) {
       console.error('Error loading messages:', error);
+    }
+  };
+
+  const loadPaymentHistory = async () => {
+    try {
+      const { payments } = await apiService.getPaymentHistory();
+      setPayments(payments);
+    } catch (error) {
+      console.error('Error loading payment history:', error);
     }
   };
 
@@ -92,6 +114,12 @@ const Dashboard: React.FC = () => {
                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
               >
                 💳 Make Payment
+              </button>
+              <button
+                onClick={() => setShowPaymentHistory(!showPaymentHistory)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+              >
+                📊 Payment History
               </button>
               <span className="text-sm text-gray-700">
                 Welcome, {currentUser?.email}
@@ -163,6 +191,38 @@ const Dashboard: React.FC = () => {
                 </p>
               )}
             </div>
+
+            {/* Payment History */}
+            {showPaymentHistory && (
+              <div className="mt-6 p-4 bg-white rounded-lg shadow">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Payment History</h3>
+                {payments.length > 0 ? (
+                  <div className="space-y-3">
+                    {payments.map((payment) => (
+                      <div key={payment.id} className="flex justify-between items-center p-3 border rounded-md">
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            ${(payment.amount / 100).toFixed(2)} {payment.currency.toUpperCase()}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {new Date(payment.created).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          payment.status === 'succeeded' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {payment.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-4">No payment history found</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

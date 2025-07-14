@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import { stripePromise, testCards, testCardDetails } from '../stripe/config';
+import { apiService } from '../services/api';
 
 const CARD_ELEMENT_OPTIONS = {
   style: {
@@ -48,6 +49,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ amount, onSuccess, onError })
     }
 
     try {
+      // Create payment intent on backend
+      const { clientSecret, paymentIntentId } = await apiService.createPaymentIntent(amount);
+
       // Create payment method
       const { error: paymentMethodError, paymentMethod } = await stripe.createPaymentMethod({
         type: 'card',
@@ -63,16 +67,19 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ amount, onSuccess, onError })
         return;
       }
 
-      // In a real app, you would send this to your backend
-      // For now, we'll simulate a successful payment
-      console.log('Payment method created:', paymentMethod);
-      
-      // Simulate API call to your backend
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      onSuccess(paymentMethod.id);
-    } catch (err) {
-      setError('An unexpected error occurred');
+      // Confirm payment with backend
+      const { success, paymentIntent } = await apiService.confirmPayment(
+        paymentIntentId,
+        paymentMethod.id
+      );
+
+      if (success) {
+        onSuccess(paymentIntent.id);
+      } else {
+        setError('Payment confirmation failed');
+      }
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
