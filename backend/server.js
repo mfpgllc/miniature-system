@@ -141,24 +141,49 @@ app.post('/api/confirm-payment', authenticateUser, async (req, res) => {
 // Get payment history
 app.get('/api/payment-history', authenticateUser, async (req, res) => {
   try {
-    const paymentsRef = db.collection('payments')
+    const { limit = 50, offset = 0, status } = req.query;
+    
+    let paymentsRef = db.collection('payments')
       .where('userId', '==', req.user.uid)
-      .orderBy('created', 'desc')
-      .limit(20);
+      .orderBy('created', 'desc');
+
+    // Add status filter if provided
+    if (status && status !== 'all') {
+      paymentsRef = paymentsRef.where('status', '==', status);
+    }
+
+    // Apply pagination
+    paymentsRef = paymentsRef.limit(parseInt(limit)).offset(parseInt(offset));
 
     const snapshot = await paymentsRef.get();
     const payments = [];
 
     snapshot.forEach(doc => {
+      const data = doc.data();
       payments.push({
         id: doc.id,
-        ...doc.data(),
-        created: doc.data().created?.toDate?.()?.toISOString(),
-        updated: doc.data().updated?.toDate?.()?.toISOString()
+        ...data,
+        created: data.created?.toDate?.()?.toISOString(),
+        updated: data.updated?.toDate?.()?.toISOString()
       });
     });
 
-    res.json({ payments });
+    // Get total count for pagination
+    const totalSnapshot = await db.collection('payments')
+      .where('userId', '==', req.user.uid)
+      .get();
+    
+    const totalCount = totalSnapshot.size;
+
+    res.json({ 
+      payments,
+      pagination: {
+        total: totalCount,
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        hasMore: parseInt(offset) + payments.length < totalCount
+      }
+    });
   } catch (error) {
     console.error('Error fetching payment history:', error);
     res.status(500).json({ error: 'Failed to fetch payment history' });
@@ -180,6 +205,76 @@ app.get('/api/payment-intent/:id', authenticateUser, async (req, res) => {
   } catch (error) {
     console.error('Error retrieving payment intent:', error);
     res.status(500).json({ error: 'Failed to retrieve payment intent' });
+  }
+});
+
+// Get payment statistics
+app.get('/api/payment-stats', authenticateUser, async (req, res) => {
+  try {
+    const { period = 'all' } = req.query;
+    
+    let startDate = null;
+    const now = new Date();
+    
+    // Calculate start date based on period
+    switch (period) {
+      case 'week':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case 'month':
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case 'year':
+        startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        startDate = null; // All time
+    }
+
+    let paymentsRef = db.collection('payments')
+      .where('userId', '==', req.user.uid);
+
+    if (startDate) {
+      paymentsRef = paymentsRef.where('created', '>=', admin.firestore.Timestamp.fromDate(startDate));
+    }
+
+    const snapshot = await paymentsRef.get();
+    
+    let totalAmount = 0;
+    let successfulPayments = 0;
+    let failedPayments = 0;
+    let processingPayments = 0;
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      totalAmount += data.amount || 0;
+      
+      switch (data.status) {
+        case 'succeeded':
+          successfulPayments++;
+          break;
+        case 'failed':
+        case 'canceled':
+          failedPayments++;
+          break;
+        case 'processing':
+          processingPayments++;
+          break;
+      }
+    });
+
+    res.json({
+      period,
+      totalPayments: snapshot.size,
+      totalAmount,
+      successfulPayments,
+      failedPayments,
+      processingPayments,
+      successRate: snapshot.size > 0 ? (successfulPayments / snapshot.size * 100).toFixed(2) : 0
+    });
+  } catch (error) {
+    console.error('Error fetching payment statistics:', error);
+    res.status(500).json({ error: 'Failed to fetch payment statistics' });
   }
 });
 

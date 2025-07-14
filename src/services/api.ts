@@ -57,7 +57,7 @@ class ApiService {
     });
   }
 
-  async getPaymentHistory(): Promise<{
+  async getPaymentHistory(limit?: number, offset?: number, status?: string): Promise<{
     payments: Array<{
       id: string;
       amount: number;
@@ -66,8 +66,31 @@ class ApiService {
       created: string;
       updated: string;
     }>;
+    pagination: {
+      total: number;
+      limit: number;
+      offset: number;
+      hasMore: boolean;
+    };
   }> {
-    return this.makeRequest('/payment-history');
+    const params = new URLSearchParams();
+    if (limit) params.append('limit', limit.toString());
+    if (offset) params.append('offset', offset.toString());
+    if (status) params.append('status', status);
+    
+    return this.makeRequest(`/payment-history?${params.toString()}`);
+  }
+
+  async getPaymentStats(period: string = 'all'): Promise<{
+    period: string;
+    totalPayments: number;
+    totalAmount: number;
+    successfulPayments: number;
+    failedPayments: number;
+    processingPayments: number;
+    successRate: string;
+  }> {
+    return this.makeRequest(`/payment-stats?period=${period}`);
   }
 
   async getPaymentIntentStatus(paymentIntentId: string): Promise<{
